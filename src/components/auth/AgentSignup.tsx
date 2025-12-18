@@ -253,6 +253,7 @@ const AgentSignup: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const captchaErrorMessage = CAPTCHA_PROVIDER === 'turnstile' ? errors.cfTurnstileResponse : errors.captchaToken;
   const isCaptchaEnabled = CAPTCHA_PROVIDER !== 'none';
+  const isFmRole = formData.applicantRole === 'FM';
 
   const handleInputChange = <K extends InputField>(field: K, value: SignupFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -289,34 +290,6 @@ const AgentSignup: React.FC = () => {
 
     if (!formData.applicantRole.trim()) {
       newErrors.applicantRole = 'Applicant role is required';
-    }
-
-    if (!formData.agentId.trim()) {
-      newErrors.agentId = 'Agent ID is required';
-    }
-
-    if (!formData.fmName.trim()) {
-      newErrors.fmName = 'F.M Name is required';
-    }
-
-    if (!formData.roleCode.trim()) {
-      newErrors.roleCode = 'Role code is required';
-    }
-
-    if (!formData.dgmName.trim()) {
-      newErrors.dgmName = 'D.G.M Name is required';
-    }
-
-    if (!formData.dgmCode.trim()) {
-      newErrors.dgmCode = 'D.G.M Code is required';
-    }
-
-    if (!formData.gmName.trim()) {
-      newErrors.gmName = 'G.M Name is required';
-    }
-
-    if (!formData.gmCode.trim()) {
-      newErrors.gmCode = 'G.M Code is required';
     }
 
     if (!formData.fullName.trim()) {
@@ -360,6 +333,10 @@ const AgentSignup: React.FC = () => {
 
     if (!formData.dob) {
       newErrors.dob = 'Date of birth is required';
+    }
+
+    if (isFmRole && !formData.roleCode.trim()) {
+      newErrors.roleCode = 'Role code is required for Field Managers';
     }
 
     if (!formData.birthPlace.trim()) {
@@ -559,7 +536,7 @@ const AgentSignup: React.FC = () => {
                   {errors.applicantRole && <p className="mt-1 text-sm text-red-600">{errors.applicantRole}</p>}
                 </div>
                 <div>
-                  <label htmlFor="agentId" className="block text-sm font-medium text-gray-700 mb-1">Agent ID <span className="text-red-500">*</span></label>
+                  <label htmlFor="agentId" className="block text-sm font-medium text-gray-700 mb-1">Agent ID (Optional)</label>
                   <div className="relative">
                     <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
@@ -576,7 +553,7 @@ const AgentSignup: React.FC = () => {
                   {errors.agentId && <p className="mt-1 text-sm text-red-600">{errors.agentId}</p>}
                 </div>
                 <div>
-                  <label htmlFor="fmName" className="block text-sm font-medium text-gray-700 mb-1">F.M Name <span className="text-red-500">*</span></label>
+                  <label htmlFor="fmName" className="block text-sm font-medium text-gray-700 mb-1">F.M Name (Optional)</label>
                   <input
                     id="fmName"
                     type="text"
@@ -591,7 +568,12 @@ const AgentSignup: React.FC = () => {
                 </div>
                 <div>
                   <label htmlFor="roleCode" className="block text-sm font-medium text-gray-700 mb-1">
-                    {formData.applicantRole || 'Role'} Code <span className="text-red-500">*</span>
+                    {(formData.applicantRole || 'Role')} Code{' '}
+                    {isFmRole ? (
+                      <span className="text-red-500">*</span>
+                    ) : (
+                      <span className="text-gray-500">(Optional)</span>
+                    )}
                   </label>
                   <input
                     id="roleCode"
@@ -601,12 +583,12 @@ const AgentSignup: React.FC = () => {
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
                       errors.roleCode ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    placeholder={`Enter ${formData.applicantRole || 'role'} code`}
+                    placeholder={`Enter ${formData.applicantRole || 'role'} code${isFmRole ? '' : ' (optional)'}`}
                   />
                   {errors.roleCode && <p className="mt-1 text-sm text-red-600">{errors.roleCode}</p>}
                 </div>
                 <div>
-                  <label htmlFor="dgmName" className="block text-sm font-medium text-gray-700 mb-1">D.G.M Name <span className="text-red-500">*</span></label>
+                  <label htmlFor="dgmName" className="block text-sm font-medium text-gray-700 mb-1">D.G.M Name (Optional)</label>
                   <input
                     id="dgmName"
                     type="text"
@@ -620,7 +602,7 @@ const AgentSignup: React.FC = () => {
                   {errors.dgmName && <p className="mt-1 text-sm text-red-600">{errors.dgmName}</p>}
                 </div>
                 <div>
-                  <label htmlFor="dgmCode" className="block text-sm font-medium text-gray-700 mb-1">D.G.M Code <span className="text-red-500">*</span></label>
+                  <label htmlFor="dgmCode" className="block text-sm font-medium text-gray-700 mb-1">D.G.M Code (Optional)</label>
                   <input
                     id="dgmCode"
                     type="text"
@@ -634,7 +616,7 @@ const AgentSignup: React.FC = () => {
                   {errors.dgmCode && <p className="mt-1 text-sm text-red-600">{errors.dgmCode}</p>}
                 </div>
                 <div>
-                  <label htmlFor="gmName" className="block text-sm font-medium text-gray-700 mb-1">G.M Name <span className="text-red-500">*</span></label>
+                  <label htmlFor="gmName" className="block text-sm font-medium text-gray-700 mb-1">G.M Name (Optional)</label>
                   <input
                     id="gmName"
                     type="text"
@@ -648,7 +630,7 @@ const AgentSignup: React.FC = () => {
                   {errors.gmName && <p className="mt-1 text-sm text-red-600">{errors.gmName}</p>}
                 </div>
                 <div>
-                  <label htmlFor="gmCode" className="block text-sm font-medium text-gray-700 mb-1">G.M Code <span className="text-red-500">*</span></label>
+                  <label htmlFor="gmCode" className="block text-sm font-medium text-gray-700 mb-1">G.M Code (Optional)</label>
                   <input
                     id="gmCode"
                     type="text"
