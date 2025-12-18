@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowLeft, MapPin, Briefcase, CheckCircle, Calendar, Home, Building, FileText, Wallet } from 'lucide-react';
 import jsPDF from 'jspdf';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { Turnstile } from '@marsidev/react-turnstile';
 import logo from '../../assets/images/logo.png';
 
 interface SignupFormData {
@@ -33,6 +35,8 @@ interface SignupFormData {
   password: string;
   confirmPassword: string;
   agreeTerms: boolean;
+  captchaToken: string;
+  cfTurnstileResponse: string;
 }
 
 interface FormErrors {
@@ -65,10 +69,31 @@ interface FormErrors {
   confirmPassword?: string;
   agreeTerms?: string;
   general?: string;
+  captchaToken?: string;
+  cfTurnstileResponse?: string;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true';
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+const RAW_CAPTCHA_PROVIDER = (import.meta.env.VITE_CAPTCHA_PROVIDER || '').toLowerCase();
+const resolveCaptchaProvider = (): 'recaptcha' | 'turnstile' | 'none' => {
+  if (RAW_CAPTCHA_PROVIDER === 'turnstile' && TURNSTILE_SITE_KEY) {
+    return 'turnstile';
+  }
+  if (RAW_CAPTCHA_PROVIDER === 'recaptcha' && RECAPTCHA_SITE_KEY) {
+    return 'recaptcha';
+  }
+  if (RECAPTCHA_SITE_KEY) {
+    return 'recaptcha';
+  }
+  if (TURNSTILE_SITE_KEY) {
+    return 'turnstile';
+  }
+  return 'none';
+};
+const CAPTCHA_PROVIDER = resolveCaptchaProvider();
 const AGENT_APPLICATION_ENDPOINT = '/v1/agents/applications/';
 
 const createAgentApplicationPayload = (formData: SignupFormData): FormData => {
@@ -98,10 +123,12 @@ const createAgentApplicationPayload = (formData: SignupFormData): FormData => {
     bankBranchName: formData.bankBranchName,
     password: formData.password,
     confirmPassword: formData.confirmPassword,
+    captchaToken: formData.captchaToken,
+    cfTurnstileResponse: formData.cfTurnstileResponse,
   };
 
   Object.entries(stringFields).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
+    if (value !== undefined && value !== null && value !== '') {
       payload.append(key, value);
     }
   });
@@ -215,18 +242,38 @@ const AgentSignup: React.FC = () => {
     educationCertificate: null,
     password: '',
     confirmPassword: '',
-    agreeTerms: false
+    agreeTerms: false,
+    captchaToken: '',
+    cfTurnstileResponse: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const captchaErrorMessage = CAPTCHA_PROVIDER === 'turnstile' ? errors.cfTurnstileResponse : errors.captchaToken;
+  const isCaptchaEnabled = CAPTCHA_PROVIDER !== 'none';
 
   const handleInputChange = <K extends InputField>(field: K, value: SignupFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleCaptchaChange = (token: string | null) => {
+    if (CAPTCHA_PROVIDER === 'recaptcha') {
+      handleInputChange('captchaToken', token ?? '');
+    } else if (CAPTCHA_PROVIDER === 'turnstile') {
+      handleInputChange('cfTurnstileResponse', token ?? '');
+    }
+  };
+
+  const handleCaptchaExpired = () => {
+    if (CAPTCHA_PROVIDER === 'recaptcha') {
+      handleInputChange('captchaToken', '');
+    } else if (CAPTCHA_PROVIDER === 'turnstile') {
+      handleInputChange('cfTurnstileResponse', '');
     }
   };
 
@@ -365,6 +412,14 @@ const AgentSignup: React.FC = () => {
 
     if (!formData.agreeTerms) {
       newErrors.agreeTerms = 'You must agree to the terms and conditions';
+    }
+
+    if (CAPTCHA_PROVIDER === 'recaptcha' && !formData.captchaToken.trim()) {
+      newErrors.captchaToken = 'Captcha verification is required';
+    }
+
+    if (CAPTCHA_PROVIDER === 'turnstile' && !formData.cfTurnstileResponse.trim()) {
+      newErrors.cfTurnstileResponse = 'Captcha verification is required';
     }
 
     setErrors(newErrors);
@@ -988,6 +1043,40 @@ const AgentSignup: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Captcha */}
+            {isCaptchaEnabled ? (
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-gray-900">Security Verification</h3>
+                <p className="text-sm text-gray-600">
+                  Please complete the {CAPTCHA_PROVIDER === 'turnstile' ? 'Cloudflare Turnstile' : 'Google reCAPTCHA'} challenge to continue.
+                </p>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  {CAPTCHA_PROVIDER === 'recaptcha' && RECAPTCHA_SITE_KEY && (
+                    <ReCAPTCHA
+                      sitekey={RECAPTCHA_SITE_KEY!}
+                      onChange={handleCaptchaChange}
+                      onExpired={handleCaptchaExpired}
+                    />
+                  )}
+                  {CAPTCHA_PROVIDER === 'turnstile' && TURNSTILE_SITE_KEY && (
+                    <Turnstile
+                      siteKey={TURNSTILE_SITE_KEY!}
+                      onSuccess={handleCaptchaChange}
+                      onExpire={handleCaptchaExpired}
+                      options={{ theme: 'light' }}
+                    />
+                  )}
+                  {captchaErrorMessage && (
+                    <p className="mt-2 text-sm text-red-600">{captchaErrorMessage}</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+                Captcha is not configured. Please set <code>VITE_CAPTCHA_PROVIDER</code> with either <code>recaptcha</code> or <code>turnstile</code> and supply the matching site key to enable submissions.
+              </div>
+            )}
 
             {/* Terms & Conditions */}
             <div className="space-y-2">

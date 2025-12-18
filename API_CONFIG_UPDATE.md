@@ -111,6 +111,22 @@ After restarting the dev server, you can verify the configuration:
 ✅ Documentation updated
 ✅ Environment files configured
 
+### Captcha Configuration (New)
+
+To submit agent applications against the Django backend you must provide a verified captcha token. Configure one of the following options in `.env.local` and restart the dev server:
+
+```env
+# Use Google reCAPTCHA v2 checkbox
+VITE_CAPTCHA_PROVIDER=recaptcha
+VITE_RECAPTCHA_SITE_KEY=<your-site-key>
+
+# Or switch to Cloudflare Turnstile
+VITE_CAPTCHA_PROVIDER=turnstile
+VITE_TURNSTILE_SITE_KEY=<your-site-key>
+```
+
+Only the provider that matches a valid site key will be rendered in the Agent Signup form. Without a configured provider the backend will reject submissions with “Captcha verification is required”.
+
 **To test with real backend:**
 1. Ensure Django backend is running on port 8000
 2. Restart Vite dev server: `npm run dev`
