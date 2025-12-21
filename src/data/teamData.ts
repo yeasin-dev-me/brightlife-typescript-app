@@ -8,8 +8,8 @@ export interface TeamMember {
 
 // Defines the structure for a single partner object
 export interface Partner {
-  name: string;
-  logo: string;
+    name: string;
+    logo: string;
 }
 
 export const teamMembers: TeamMember[] = [
@@ -63,10 +63,35 @@ export const teamMembers: TeamMember[] = [
     },
 ];
 
-export const partners: Partner[] = [
-    { name: "Holy Family Hospital", logo: "/holy-family-hospital.png" },
-    { name: "Islami Bank Hospital", logo: "/Islamibank-hospital.png" },
-    { name: "Labaid Hospital", logo: "/Labaid-hospital.png" },
-    { name: "Square Hospital", logo: "/square_hospital.png" },
-    { name: "Protective Life Ins. Ltd.", logo: "/protective-lifeIns. Ltd..png" },
+const partnerPhotoFiles: string[] = [
+    "WhatsApp Image 2025-12-06 at 12.23.40 PM.jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (1).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (2).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (3).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (4).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (5).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (6).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (7).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (8).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (9).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (10).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (11).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (12).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (13).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (14).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (15).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (16).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (17).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (18).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (19).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM (20).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.25 PM.jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.26 PM (1).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.26 PM (2).jpeg",
+    "WhatsApp Image 2025-12-06 at 6.43.26 PM.jpeg"
 ];
+
+export const partners: Partner[] = partnerPhotoFiles.map((fileName, index) => ({
+    name: `Hospital Partner ${String(index + 1).padStart(2, '0')}`,
+    logo: `/partner-hospital-photos/${fileName}`,
+}));
