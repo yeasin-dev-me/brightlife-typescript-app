@@ -129,7 +129,6 @@ const AboutUs: React.FC = () => {
                                                 className="max-h-28 sm:max-h-36 md:max-h-44 lg:max-h-52 xl:max-h-60 w-auto max-w-full object-contain hover:scale-110 transition-transform duration-300"
                                             />
                                         </div>
-                                        <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 text-center leading-tight">{partner.name}</p>
                                     </div>
                                 </div>
                             ))}
@@ -147,7 +146,6 @@ const AboutUs: React.FC = () => {
                                                 className="max-h-28 sm:max-h-36 md:max-h-44 lg:max-h-52 xl:max-h-60 w-auto max-w-full object-contain hover:scale-110 transition-transform duration-300"
                                             />
                                         </div>
-                                        <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 text-center leading-tight">{partner.name}</p>
                                     </div>
                                 </div>
                             ))}

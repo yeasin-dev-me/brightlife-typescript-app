@@ -150,7 +150,7 @@
 
     .partner-carousel .carousel-track {
         display: flex;
-        animation: scroll 20s linear infinite;
+        animation: scroll 45s linear infinite;
         width: max-content;
     }
     .partner-carousel:hover .carousel-track {

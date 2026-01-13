@@ -46,9 +46,6 @@ const InsurancePartner: React.FC = () => (
                                     className="h-28 w-full mx-auto object-contain rounded-lg"
                                 />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-800 mb-2 font-heading group-hover:text-blue-600 transition-colors duration-300">
-                                {partner.name}
-                            </h3>
                             <p className="text-sm text-gray-600 leading-relaxed">
                                 {partnerDescriptionPool[index % partnerDescriptionPool.length]}
                             </p>
